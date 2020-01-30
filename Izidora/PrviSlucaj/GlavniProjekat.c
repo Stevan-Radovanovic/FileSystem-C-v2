@@ -4,7 +4,6 @@
 
 int main(void) {
 
-	poveziPokazivace();
 	glavniMeni();
 
 	return 0;

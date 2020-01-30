@@ -8,11 +8,9 @@ FILE* promeneDat;
 void meni();
 void ubaciProizvod();
 void ubaciPromenu();
-void kreirajDatoteke();
 
 int main(void) {
 
-	kreirajDatoteke();
 	meni();
 }
 
@@ -67,9 +65,8 @@ void ubaciProizvod() {
 	printf("Unesite cenu: ");
 	scanf(" %lf", &p.cena);
 	getchar();
-	printf("Unesite stanje: ");
-	scanf("%d", &p.stanje);
-	getchar();
+	printf("Unesite opis: ");
+	gets(p.opis);
 
 	printf("\nProizvod je uspesno unet u datoteku!\n");
 
@@ -96,15 +93,4 @@ void ubaciPromenu() {
 
 	fwrite(&p, sizeof(promena), 1, datotekaPromena);
 	fclose(datotekaPromena);
-}
-
-void kreirajDatoteke() {
-
-	datotekaPromena = fopen("..\\PrviSlucaj\\Promena.dat", "wb");
-	fclose(datotekaPromena);
-
-	datotekaProizvoda = fopen("..\\PrviSlucaj\\Proizvod.dat", "wb");
-	fclose(datotekaProizvoda);
-
-	printf("Datoteke su kreirane");
 }

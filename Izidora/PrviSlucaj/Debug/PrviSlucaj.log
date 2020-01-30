@@ -1,4 +1,3 @@
 ﻿  GlavniProjekat.c
-c:\users\stevanmcfc\source\repos\izidora\prvislucaj\funkcije.h(224): warning C4013: 'strcpy' undefined; assuming extern returning int
-c:\users\stevanmcfc\source\repos\izidora\prvislucaj\funkcije.h(283): warning C4013: 'system' undefined; assuming extern returning int
+c:\users\stevanmcfc\source\repos\izidora\prvislucaj\funkcije.h(232): warning C4013: 'system' undefined; assuming extern returning int
   PrviSlucaj.vcxproj -> C:\Users\StevanMcfc\source\repos\Izidora\Debug\PrviSlucaj.exe

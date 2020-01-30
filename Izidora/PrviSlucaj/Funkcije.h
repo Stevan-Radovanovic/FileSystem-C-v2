@@ -3,6 +3,7 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
+#include <string.h>
 
 //Datoteke
 FILE* datotekaProizvoda = NULL;
@@ -14,7 +15,7 @@ typedef struct proizvod {
 	int sifra;
 	char naziv[20];
 	double cena;
-	int stanje;
+	char opis[40];
 } proizvod;
 
 typedef struct promena {
@@ -23,13 +24,11 @@ typedef struct promena {
 	int kolicina;
 } promena;
 
-//Pocetna funkcija
-void poveziPokazivace() {
-	datotekaProizvoda = fopen("Proizvod.dat","rb");
-	datotekaPromena = fopen("Promena.dat", "rb");
-	fclose(datotekaProizvoda);
-	fclose(datotekaPromena);
-}
+typedef struct trenutnoStanje {
+	int sifra;
+	char naziv[20];
+	int stanje;
+} stanje;
 
 //Funkcije za Promena.dat
 void pretraziDatotekuPromena() {
@@ -38,12 +37,12 @@ void pretraziDatotekuPromena() {
 	promena P;
 	int unetaSifra;
 
+	datotekaPromena = fopen("Promena.dat", "rb");
+
 	if (datotekaPromena == NULL) {
 		printf("Datoteka nije kreirana\n");
 		return;
 	}
-
-	datotekaProizvoda = fopen("Promena.dat", "rb");
 
 	printf("Unesite sifru po kojoj pretrazujete: ");
 	scanf("%d", &unetaSifra);
@@ -53,7 +52,7 @@ void pretraziDatotekuPromena() {
 	while (fread(&P, sizeof(promena), 1, datotekaPromena) != 0) {
 		if (P.sifra == unetaSifra)
 		{
-			printf("%2d|%2c|%3d\n", P.sifra, P.tip, P.kolicina); i++;
+			printf("%2d|%2c|%3d|\n", P.sifra, P.tip, P.kolicina); i++;
 		}
 	}
 
@@ -67,17 +66,17 @@ void prikaziDatotekuPromena() {
 	int i = 0;
 	promena P;
 
+	datotekaPromena = fopen("Promena.dat", "rb");
+
 	if (datotekaPromena == NULL) {
 		printf("Datoteka nije kreirana\n");
 		return;
 	}
 
-	datotekaPromena = fopen("Promena.dat", "rb");
-
 	printf("Prikaz promena:\n");
 
 	while (fread(&P, sizeof(promena), 1, datotekaPromena) != 0) {
-		printf("%2d|%2c|%3d\n", P.sifra, P.tip, P.kolicina); i++;
+		printf("%2d|%2c|%3d|\n", P.sifra, P.tip, P.kolicina); i++;
 	}
 
 	if (i == 0) printf("Datoteka je prazna\n");
@@ -91,6 +90,10 @@ void prikaziDatotekuProizvoda() {
 	int i = 0;
 	proizvod P;
 
+	
+
+	datotekaProizvoda = fopen("Proizvod.dat", "rb");
+
 	if (datotekaProizvoda == NULL) {
 		printf("Datoteka nije kreirana\n");
 		return;
@@ -98,10 +101,8 @@ void prikaziDatotekuProizvoda() {
 
 	printf("Prikaz proizvoda:\n");
 
-	datotekaProizvoda = fopen("Proizvod.dat", "rb");
-
 	while (fread(&P, sizeof(proizvod), 1, datotekaProizvoda) != 0) {
-		printf("%2d|%20s|%5.2lf|%4d\n", P.sifra, P.naziv, P.cena, P.stanje); i++;
+		printf("%2d|%20s|%5.2lf|%30s|\n", P.sifra, P.naziv, P.cena, P.opis); i++;
 	}
 
 	if (i == 0) printf("Datoteka je prazna\n");
@@ -115,6 +116,8 @@ void pretraziDatotekuProizvoda() {
 	proizvod P;
 	int unetaSifra;
 
+	datotekaProizvoda = fopen("Proizvod.dat", "rb");
+
 	if (datotekaProizvoda == NULL) {
 		printf("Datoteka nije kreirana\n");
 		return;
@@ -125,12 +128,10 @@ void pretraziDatotekuProizvoda() {
 
 	printf("\nProizvodi sa zadatom sifrom:\n");
 
-	datotekaProizvoda = fopen("Proizvod.dat", "rb");
-
 	while (fread(&P, sizeof(proizvod), 1, datotekaProizvoda) != 0) {
 		if (P.sifra == unetaSifra)
 		{
-			printf("%2d|%20s|%5.2lf|%4d\n", P.sifra, P.naziv, P.cena, P.stanje);
+			printf("%2d|%20s|%5.2lf|%30s|\n", P.sifra, P.naziv, P.cena, P.opis);
 			i++;
 		}
 	}
@@ -141,126 +142,74 @@ void pretraziDatotekuProizvoda() {
 }
 
 //Funkcije za TrenutnoStanje.txt
+int postojiUNizuStanja(stanje nizStanja[], int brojac, promena prom) {
+
+	for (int i = 0; i < brojac; i++) {
+		if (prom.sifra == nizStanja[i].sifra) return i;
+	}
+
+	return -1;
+}
+
+void promeniStanje(stanje niz[],int indeks, promena prom) {
+	if (prom.tip == 'U' || prom.tip == 'u') 
+		niz[indeks].stanje = niz[indeks].stanje + prom.kolicina;
+	else
+		niz[indeks].stanje = niz[indeks].stanje - prom.kolicina;
+}
+
+void dodajUNizStanja(stanje nizStanja[], int *brojac, promena prom) {
+
+	FILE* datotekaProizvoda = fopen("Proizvod.dat", "r+b");
+	proizvod pr;
+	while (fread(&pr, sizeof(proizvod), 1, datotekaProizvoda)) {
+
+		if (prom.sifra == pr.sifra) {
+			stanje s;
+			s.sifra = pr.sifra;
+			strcpy(s.naziv, pr.naziv);
+			if (prom.tip == 'U' || prom.tip == 'u') s.stanje = prom.kolicina;
+			else s.stanje = -prom.kolicina;
+			nizStanja[(*brojac)++] = s;
+			return;
+		}
+
+	}
+	fclose(datotekaProizvoda);
+
+}
+
 void kreirajTrenutnoStanje() {
 
-	//Azuriranje promena
-	int i = 0;
-	promena P;
+	stanje nizStanja[100];
+	int brojac = 0;
 
-	FILE* azuriranePromene = fopen("AzuriranePromene.dat", "w+b");
-	datotekaPromena = fopen("Promena.dat", "rb");
+	FILE* datotekaPromena = fopen("Promena.dat", "r+b");
+	promena prom;
 
-	int brojac = 1;
-	int nizGotovih[100]; int brN = 0;
-	int read;
-
-	while (1 == 1) {
-
-		fseek(datotekaPromena, 0, SEEK_SET);
-
-		for (int i = 1; i <= brojac; i++)
-			read = fread(&P, sizeof(promena), 1, datotekaPromena);
-
-		if (read == 0) {
-			fclose(datotekaPromena);
-			fclose(azuriranePromene);
-			break;
+	while (fread(&prom, sizeof(promena), 1, datotekaPromena)) {
+		int indeks;
+		if((indeks=postojiUNizuStanja(nizStanja, brojac, prom)) !=-1) {
+				promeniStanje(nizStanja,indeks, prom);
 		}
-
-		brojac++;
-		int signal = 1;
-		for (int i = 0; i < brN; i++) {
-			if (P.sifra == nizGotovih[i]) signal = 0;
-		}
-
-		if (signal == 0) continue;
-
-		nizGotovih[brN++] = P.sifra;
-		promena glavna;
-		glavna.sifra = P.sifra;
-		glavna.kolicina = P.kolicina;
-		glavna.tip = P.tip;
-
-		if (glavna.tip == 'U' || glavna.tip == 'u') glavna.kolicina = P.kolicina;
-		else glavna.kolicina = -P.kolicina;
-
-
-		while (fread(&P, sizeof(promena), 1, datotekaPromena) != 0) {
-			if (glavna.sifra == P.sifra) {
-				if (P.tip == 'U' || P.tip == 'u') glavna.kolicina += P.kolicina;
-				else glavna.kolicina -= P.kolicina;
-			}
-		}
-
-		if (glavna.kolicina > 0)
-			glavna.tip = 'u';
 		else {
-			glavna.tip = 'i';
-			glavna.kolicina = -glavna.kolicina;
+				dodajUNizStanja(nizStanja, &brojac, prom);
 		}
-
-		fwrite(&glavna, sizeof(promena), 1, azuriranePromene);
 	}
 
-	//Azuriranje proizvoda
-	i = 0;
-	proizvod pr;
-
-	FILE* azuriraniProizvodi = fopen("AzuriraniProizvodi.dat", "w+b");
-	datotekaProizvoda = fopen("Proizvod.dat", "r+b");
-	azuriranePromene = fopen("AzuriranePromene.dat", "r+b");
-
-	while (fread(&P, sizeof(promena), 1, azuriranePromene)) {
-
-		int uspesno = 0;
-
-		while (fread(&pr, sizeof(proizvod), 1, datotekaProizvoda)) {
-
-			if (pr.sifra == P.sifra) {
-				proizvod glavni;
-				glavni.sifra = pr.sifra;
-				glavni.stanje = pr.stanje;
-				glavni.cena = pr.cena;
-				strcpy(glavni.naziv, pr.naziv);
-
-				if (P.tip == 'u' || P.tip == 'U') {
-					glavni.stanje += P.kolicina;
-				}
-				else {
-				glavni.stanje -= P.kolicina;
-				}
-
-				if (glavni.stanje >= 0) {
-					fwrite(&glavni, sizeof(proizvod), 1, azuriraniProizvodi);
-					uspesno = 1;
-				}
-				else {
-					fwrite(&pr, sizeof(proizvod), 1, azuriraniProizvodi);
-				}
-			}
-		}
-
-		fseek(datotekaProizvoda, 0, SEEK_SET);
+	trenutnoStanje = fopen("TrenutnoStanje.txt", "w");
+	char str1[] = "Sifra";
+	char str2[] = "Naziv";
+	char str3[] = "Kolicina";
+	fprintf(trenutnoStanje, "%6s|%12s|%10s|\n", str1, str2, str3);
+	for (int i = 0; i < brojac; i++) {
+		if (nizStanja[i].stanje < 0) nizStanja[i].stanje = 0;
+		fprintf(trenutnoStanje, "%6d|%12s|%10d|\n", nizStanja[i].sifra, nizStanja[i].naziv, nizStanja[i].stanje);
 	}
-
-	fclose(azuriranePromene);
-	fclose(datotekaProizvoda);
-	fclose(azuriraniProizvodi);
-	
-	//Pravljenje trenutnog stanja
-	trenutnoStanje = fopen("TrenutnoStanje.txt", "w+");
-	azuriraniProizvodi = fopen("AzuriraniProizvodi.dat", "rb");
-
-	brojac = 0;
-
-	while (fread(&pr, sizeof(proizvod), 1, azuriraniProizvodi)) {
-		fprintf(trenutnoStanje, "%2d|%20s|%5.2lf|%4d\n", pr.sifra, pr.naziv, pr.cena, pr.stanje); brojac++;
-	}
-
 	fclose(trenutnoStanje);
-	fclose(azuriraniProizvodi);
 
 	printf("Datoteka trenutnog stanja je kreirana\n");
+
 }
 
 void prikaziTrenutnoStanje() {
