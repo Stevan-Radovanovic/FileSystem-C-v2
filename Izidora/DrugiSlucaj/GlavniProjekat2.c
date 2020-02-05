@@ -1,10 +1,10 @@
 #define _CRT_SECURE_NO_WARNINGS
-#include "Funkcije.h"
+#include "../PrviSlucaj/Funkcije.h"
 #include <stdio.h>
 
 int main(void) {
 
-	glavniMeni1();
+	glavniMeni2();
 
 	return 0;
 }

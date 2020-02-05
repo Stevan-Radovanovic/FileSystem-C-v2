@@ -37,7 +37,7 @@ void pretraziDatotekuPromena() {
 	promena P;
 	int unetaSifra;
 
-	datotekaPromena = fopen("Promena.dat", "rb");
+	datotekaPromena = fopen("..\\PrviSlucaj\\Promena.dat", "rb");
 
 	if (datotekaPromena == NULL) {
 		printf("Datoteka nije kreirana\n");
@@ -66,7 +66,7 @@ void prikaziDatotekuPromena() {
 	int i = 0;
 	promena P;
 
-	datotekaPromena = fopen("Promena.dat", "rb");
+	datotekaPromena = fopen("..\\PrviSlucaj\\Promena.dat", "rb");
 
 	if (datotekaPromena == NULL) {
 		printf("Datoteka nije kreirana\n");
@@ -85,14 +85,14 @@ void prikaziDatotekuPromena() {
 }
 
 //Funkcije za Proizvod.dat
-void prikaziDatotekuProizvoda() {
+void prikaziDatotekuProizvoda(char ime[]) {
 
 	int i = 0;
 	proizvod P;
 
 	
 
-	datotekaProizvoda = fopen("Proizvod.dat", "rb");
+	datotekaProizvoda = fopen(ime, "rb");
 
 	if (datotekaProizvoda == NULL) {
 		printf("Datoteka nije kreirana\n");
@@ -110,13 +110,13 @@ void prikaziDatotekuProizvoda() {
 	fclose(datotekaProizvoda);
 }
 
-void pretraziDatotekuProizvoda() {
+void pretraziDatotekuProizvoda(char ime[]) {
 
 	int i = 0;
 	proizvod P;
 	int unetaSifra;
 
-	datotekaProizvoda = fopen("Proizvod.dat", "rb");
+	datotekaProizvoda = fopen(ime, "rb");
 
 	if (datotekaProizvoda == NULL) {
 		printf("Datoteka nije kreirana\n");
@@ -141,6 +141,36 @@ void pretraziDatotekuProizvoda() {
 	fclose(datotekaProizvoda);
 }
 
+
+//Funkcije za Greske.txt
+void prikaziGreske() {
+
+	FILE* greske = fopen("..\\PrviSlucaj\\Greske.txt", "r");
+	char c;
+
+
+
+	printf("Prikaz datoteke gresaka: \n");
+
+	if (greske == NULL) {
+		printf("Datoteka je prazna\n");
+		return;
+	}
+
+	int signal = 0;
+	while ((c = fgetc(greske)) != EOF) {
+		printf("%c", c); signal = 1;
+	}
+
+	if (signal == 0) printf("Datoteka je prazna\n");
+
+}
+
+void resetujGreske() {
+	FILE* greske = fopen("..\\PrviSlucaj\\Greske.txt", "w");
+	fclose(greske);
+}
+
 //Funkcije za TrenutnoStanje.txt
 int postojiUNizuStanja(stanje nizStanja[], int brojac, promena prom) {
 
@@ -148,7 +178,7 @@ int postojiUNizuStanja(stanje nizStanja[], int brojac, promena prom) {
 		if (prom.sifra == nizStanja[i].sifra) return i;
 	}
 
-	return -1;
+	return -1; //signal da ne postoji u nizu stanja proizvod sa datom sifrom
 }
 
 void promeniStanje(stanje niz[],int indeks, promena prom) {
@@ -158,9 +188,9 @@ void promeniStanje(stanje niz[],int indeks, promena prom) {
 		niz[indeks].stanje = niz[indeks].stanje - prom.kolicina;
 }
 
-void dodajUNizStanja(stanje nizStanja[], int *brojac, promena prom) {
+void dodajUNizStanja(stanje nizStanja[], int *brojac, promena prom, int slucaj) {
 
-	FILE* datotekaProizvoda = fopen("Proizvod.dat", "r+b");
+	FILE* datotekaProizvoda = fopen("..\\PrviSlucaj\\Proizvod.dat", "r+b");
 	proizvod pr;
 	while (fread(&pr, sizeof(proizvod), 1, datotekaProizvoda)) {
 
@@ -171,20 +201,55 @@ void dodajUNizStanja(stanje nizStanja[], int *brojac, promena prom) {
 			if (prom.tip == 'U' || prom.tip == 'u') s.stanje = prom.kolicina;
 			else s.stanje = -prom.kolicina;
 			nizStanja[(*brojac)++] = s;
+			fclose(datotekaProizvoda);
 			return;
 		}
 
 	}
+
+	if (slucaj == 1) {
+		fclose(datotekaProizvoda);
+		return;
+	}
+
+	datotekaProizvoda = fopen("..\\PrviSlucaj\\NoviProizvod.dat", "r+b");
+	while (fread(&pr, sizeof(proizvod), 1, datotekaProizvoda)) {
+
+		if (prom.sifra == pr.sifra) {
+			stanje s;
+			s.sifra = pr.sifra;
+			strcpy(s.naziv, pr.naziv);
+			if (prom.tip == 'U' || prom.tip == 'u') s.stanje = prom.kolicina;
+			else s.stanje = -prom.kolicina;
+			nizStanja[(*brojac)++] = s;
+			fclose(datotekaProizvoda);
+			return;
+		}
+
+	}
+
+	if (slucaj == 2) {
+		fclose(datotekaProizvoda);
+		return;
+	}
+
+	FILE* greske = fopen("..\\PrviSlucaj\\Greske.txt", "a");
+	fprintf(greske,"Doslo je do greske pri sledecem unosu: %d %c %d\n",prom.sifra,prom.tip,prom.kolicina);
+	fclose(greske);
 	fclose(datotekaProizvoda);
+
+	
 
 }
 
-void kreirajTrenutnoStanje() {
+void kreirajTrenutnoStanje(int slucaj) {
 
 	stanje nizStanja[100];
 	int brojac = 0;
 
-	FILE* datotekaPromena = fopen("Promena.dat", "r+b");
+	resetujGreske(); //za brisanje gresaka
+
+	FILE* datotekaPromena = fopen("..\\PrviSlucaj\\Promena.dat", "r+b");
 	promena prom;
 
 	while (fread(&prom, sizeof(promena), 1, datotekaPromena)) {
@@ -193,11 +258,11 @@ void kreirajTrenutnoStanje() {
 				promeniStanje(nizStanja,indeks, prom);
 		}
 		else {
-				dodajUNizStanja(nizStanja, &brojac, prom);
+				dodajUNizStanja(nizStanja, &brojac, prom, slucaj);
 		}
 	}
 
-	trenutnoStanje = fopen("TrenutnoStanje.txt", "w");
+	trenutnoStanje = fopen("..\\PrviSlucaj\\TrenutnoStanje.txt", "w");
 	char str1[] = "Sifra";
 	char str2[] = "Naziv";
 	char str3[] = "Kolicina";
@@ -214,7 +279,7 @@ void kreirajTrenutnoStanje() {
 
 void prikaziTrenutnoStanje() {
 
-	trenutnoStanje = fopen("TrenutnoStanje.txt", "r");
+	trenutnoStanje = fopen("..\\PrviSlucaj\\TrenutnoStanje.txt", "r");
 	char c;
 
 	printf("Prikaz datoteke trenutnog stanja: \n");
@@ -227,8 +292,122 @@ void prikaziTrenutnoStanje() {
 
 }
 
+
 //Funkcija za prikaz
-void glavniMeni() {
+void glavniMeni3() {
+	system("cls");
+	int odabir;
+	while (1 == 1) {
+
+		printf("********************************\n");
+		printf("*         Glavni meni          *\n");
+		printf("* 1. Prikazi proizvode         *\n");
+		printf("* 2. Pretrazi proizvode        *\n");
+		printf("* 3. Pretrazi nove proizvode   *\n");
+		printf("* 4. Pretrazi nove proizvode   *\n");
+		printf("* 5. Prikazi promene stanja    *\n");
+		printf("* 6. Pretrazi promene stanja   *\n");
+		printf("* 7. Kreiraj trenutno stanje   *\n");
+		printf("* 8. Prikazi trenutno stanje   *\n");
+		printf("* 9. Prikazi greske            *\n");
+		printf("* 10. Izlazak iz aplikacije    *\n");
+		printf("********************************\n");
+		printf("Vas odabir? ");
+
+		scanf("%d", &odabir);
+
+		switch (odabir) {
+		case 1: prikaziDatotekuProizvoda("..\\PrviSlucaj\\Proizvod.dat"); break;
+
+		case 2: pretraziDatotekuProizvoda("..\\PrviSlucaj\\Proizvod.dat"); break;
+
+		case 3: prikaziDatotekuProizvoda("..\\PrviSlucaj\\NoviProizvod.dat"); break;
+
+		case 4: pretraziDatotekuProizvoda("..\\PrviSlucaj\\NoviProizvod.dat"); break;
+
+		case 5: prikaziDatotekuPromena(); break;
+
+		case 6: pretraziDatotekuPromena(); break;
+
+		case 7: kreirajTrenutnoStanje(3); break;
+
+		case 8: prikaziTrenutnoStanje(); break;
+
+		case 9: prikaziGreske(); break;
+
+		case 10: {
+			printf("Dovidjenja!\n");
+			system("pause");
+			return;
+		}
+
+		default: {
+			printf("Uneli ste nepostojecu vrednost, pokusajte ponovo.\n");
+			break;
+		}
+		}
+
+		system("pause");
+		system("cls");
+	}
+}
+
+void glavniMeni2() {
+	system("cls");
+	int odabir;
+	while (1 == 1) {
+
+		printf("********************************\n");
+		printf("*         Glavni meni          *\n");
+		printf("* 1. Prikazi proizvode         *\n");
+		printf("* 2. Pretrazi proizvode        *\n");
+		printf("* 3. Prikazi nove proizvode    *\n");
+		printf("* 4. Pretrazi nove proizvode   *\n");
+		printf("* 5. Prikazi promene stanja    *\n");
+		printf("* 6. Pretrazi promene stanja   *\n");
+		printf("* 7. Kreiraj trenutno stanje   *\n");
+		printf("* 8. Prikazi trenutno stanje   *\n");
+		printf("* 9. Izlazak iz aplikacije     *\n");
+		printf("********************************\n");
+		printf("Vas odabir? ");
+
+		scanf("%d", &odabir);
+
+		switch (odabir) {
+		case 1: prikaziDatotekuProizvoda("..\\PrviSlucaj\\Proizvod.dat"); break;
+
+		case 2: pretraziDatotekuProizvoda("..\\PrviSlucaj\\Proizvod.dat"); break;
+
+		case 3: prikaziDatotekuProizvoda("..\\PrviSlucaj\\NoviProizvod.dat"); break;
+
+		case 4: pretraziDatotekuProizvoda("..\\PrviSlucaj\\NoviProizvod.dat"); break;
+
+		case 5: prikaziDatotekuPromena(); break;
+
+		case 6: pretraziDatotekuPromena(); break;
+
+		case 7: kreirajTrenutnoStanje(2); break;
+
+		case 8: prikaziTrenutnoStanje(); break;
+
+		case 9: {
+			printf("Dovidjenja!\n");
+			system("pause");
+			return;
+		}
+
+		default: {
+			printf("Uneli ste nepostojecu vrednost, pokusajte ponovo.\n");
+			break;
+		}
+		}
+
+		system("pause");
+		system("cls");
+	}
+}
+
+void glavniMeni1() {
 	system("cls");
 	int odabir;
 	while (1 == 1) {
@@ -248,15 +427,15 @@ void glavniMeni() {
 		scanf("%d", &odabir);
 
 		switch (odabir) {
-		case 1: prikaziDatotekuProizvoda(); break;
+		case 1: prikaziDatotekuProizvoda("..\\PrviSlucaj\\Proizvod.dat"); break;
 
-		case 2: pretraziDatotekuProizvoda(); break;
+		case 2: pretraziDatotekuProizvoda("..\\PrviSlucaj\\Proizvod.dat"); break;
 
 		case 3: prikaziDatotekuPromena(); break;
 
 		case 4: pretraziDatotekuPromena(); break;
 
-		case 5: kreirajTrenutnoStanje(); break;
+		case 5: kreirajTrenutnoStanje(1); break;
 
 		case 6: prikaziTrenutnoStanje(); break;
 
