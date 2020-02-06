@@ -20,8 +20,23 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Funkcije.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Strukture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Meni.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Prikazivanje.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Pretrazivanje.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Greske.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TrenutnoStanje.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

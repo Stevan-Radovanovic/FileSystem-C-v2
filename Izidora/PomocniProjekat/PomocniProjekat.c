@@ -1,6 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
-#include "..\PrviSlucaj\Funkcije.h"
+#include "..\PrviSlucaj\Strukture.h"
 
 FILE* proizvodDat;
 FILE* promeneDat;

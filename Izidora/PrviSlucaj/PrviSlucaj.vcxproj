@@ -118,7 +118,12 @@
     <ClCompile Include="GlavniProjekat.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Funkcije.h" />
+    <ClInclude Include="Greske.h" />
+    <ClInclude Include="Meni.h" />
+    <ClInclude Include="Pretrazivanje.h" />
+    <ClInclude Include="Prikazivanje.h" />
+    <ClInclude Include="Strukture.h" />
+    <ClInclude Include="TrenutnoStanje.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
